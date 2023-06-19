@@ -11,6 +11,12 @@ module.exports = {
     }),
   ],
   devtool: 'inline-source-map',
+  devServer: {
+    static: './dist',
+  },
+  optimization: {
+    runtimeChunk: 'single',
+  },
   output: {
     filename: '[name].bundle.js',
     path: path.resolve(__dirname, 'dist'),
