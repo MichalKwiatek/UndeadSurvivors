@@ -2,13 +2,6 @@
 
   function calculateMovementDirection(arrowPressedState) {
     try {
-      const arrowDirections = {
-        LEFT: 'LEFT',
-        RIGHT: 'RIGHT',
-        UP: 'UP',
-        DOWN: 'DOWN',
-      }
-
       const arrowOpposites = {
         LEFT: 'RIGHT',
         RIGHT: 'LEFT',
