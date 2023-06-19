@@ -1,5 +1,55 @@
 (function () {
 
+  function calculateMovementDirection(arrowPressedState) {
+    try {
+      const arrowDirections = {
+        LEFT: 'LEFT',
+        RIGHT: 'RIGHT',
+        UP: 'UP',
+        DOWN: 'DOWN',
+      }
+
+      const arrowOpposites = {
+        LEFT: 'RIGHT',
+        RIGHT: 'LEFT',
+        UP: 'DOWN',
+        DOWN: 'UP',
+      }
+
+      const arrowNeighbours = {
+        LEFT: ['UP', 'DOWN'],
+        RIGHT: ['UP', 'DOWN'],
+        UP: ['LEFT', 'RIGHT'],
+        DOWN: ['LEFT', 'RIGHT'],
+      }
+
+      const movementDirections = Object.keys(arrowPressedState)
+        .filter(direction => arrowPressedState[direction])
+        .map(direction => {
+          if (!arrowPressedState[direction]) {
+            return []
+          }
+
+          if (arrowPressedState[direction] && arrowPressedState[arrowOpposites[direction]]) {
+            throw new Error('Incorrect arrow pressed state')
+          }
+
+          const neighbourArrowPressed = arrowNeighbours[direction].find(neighbour => arrowPressedState[neighbour])
+          if (arrowPressedState[direction] && neighbourArrowPressed) {
+            return [neighbourArrowPressed, direction]
+          }
+
+          return [direction]
+        })
+
+      return movementDirections
+        .filter(movementDirection => movementDirection && movementDirection.length > 0)[0] || []
+    } catch (error) {
+      console.error(error)
+      return []
+    }
+  }
+
   const CANVAS_WIDTH = 500
   const CANVAS_HEIGHT = 500
 
@@ -7,8 +57,29 @@
   canvas.width = CANVAS_WIDTH
   canvas.height = CANVAS_HEIGHT
 
-  let movement = null
+  let arrowPressedState = {
+    LEFT: false,
+    RIGHT: false,
+    UP: false,
+    DOWN: false,
+  }
+
+  let movementHorizontalModifier = {
+    LEFT: -1,
+    RIGHT: 1,
+    UP: 0,
+    DOWN: 0,
+  }
+
+  let movementVerticalModifier = {
+    LEFT: 0,
+    RIGHT: 0,
+    UP: -1,
+    DOWN: 1,
+  }
+
   let positionHorizontal = 250
+  let positionVertical = 250
 
   const ctx = canvas.getContext('2d')
 
@@ -16,14 +87,14 @@
     ctx.fillStyle = 'green'
     ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT)
 
-    if (movement === 'LEFT') {
-      positionHorizontal--
-    } else {
-      
+    const movements = calculateMovementDirection(arrowPressedState)
+    if (movements.length > 0) {
+      positionHorizontal += movements.reduce((acc, movement) => acc + movementHorizontalModifier[movement], 0)
+      positionVertical += movements.reduce((acc, movement) => acc + movementVerticalModifier[movement], 0)
     }
 
     ctx.fillStyle = 'red'
-    ctx.fillRect(positionHorizontal, 0, 20, 20)
+    ctx.fillRect(positionHorizontal, positionVertical, 20, 20)
 
     requestAnimationFrame(animate)
   }
@@ -36,13 +107,37 @@
 
     document.onkeydown = function (e) {
       if (e.keyCode === arrowLeft) {
-        movement = 'LEFT'
+        arrowPressedState.LEFT = true
+      }
+
+      if (e.keyCode === arrowRight) {
+        arrowPressedState.RIGHT = true
+      }
+
+      if (e.keyCode === arrowUp) {
+        arrowPressedState.UP = true
+      }
+
+      if (e.keyCode === arrowDown) {
+        arrowPressedState.DOWN = true
       }
     };
 
     document.onkeyup = function (e) {
       if (e.keyCode === arrowLeft) {
-        movement = null
+        arrowPressedState.LEFT = false
+      }
+
+      if (e.keyCode === arrowRight) {
+        arrowPressedState.RIGHT = false
+      }
+
+      if (e.keyCode === arrowUp) {
+        arrowPressedState.UP = false
+      }
+
+      if (e.keyCode === arrowDown) {
+        arrowPressedState.DOWN = false
       }
     };
   }
